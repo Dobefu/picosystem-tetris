@@ -1,0 +1,15 @@
+.idea
+.vscode
+_deps
+cmake-*
+build/*
+build-*
+!build/.gitkeep
+.DS_Store
+*.pdf
+CMakeCache.txt
+CMakeFiles/
+generated/
+elf2uf2/
+pioasm/
+pioasm-install/
