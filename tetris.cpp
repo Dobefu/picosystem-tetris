@@ -566,6 +566,9 @@ void update(uint32_t tick) {
       state = states::TITLE;
 
       score = 0;
+      lines_cleared = 0;
+      level = 1;
+
       next_pieces.clear();
       queue_random_pieces();
       hold_piece = -1;
