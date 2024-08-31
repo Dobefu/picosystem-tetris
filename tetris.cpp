@@ -683,6 +683,7 @@ void update(uint32_t tick)
       draw_next_container();
       draw_next_pieces();
       draw_hold_container();
+      draw_hold_piece();
     }
 
     return;
@@ -915,12 +916,12 @@ void draw(uint32_t tick)
   }
 
   // DEBUG
-  font();
-  pen();
-  frect(225, 200, 20, 40);
-  pen(0, 0, 0);
-  text(str((uint32_t)lines_cleared), 226, 201);
-  text(str((uint32_t)lock_delay), 226, 211);
-  text(str(stats.idle), 226, 221);
-  text(str(stats.fps), 226, 231);
+  // font();
+  // pen();
+  // frect(225, 200, 20, 40);
+  // pen(0, 0, 0);
+  // text(str((uint32_t)lines_cleared), 226, 201);
+  // text(str((uint32_t)lock_delay), 226, 211);
+  // text(str(stats.idle), 226, 221);
+  // text(str(stats.fps), 226, 231);
 }
