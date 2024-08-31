@@ -33,6 +33,7 @@ uint32_t score = 0;
 
 uint8_t pressed_time_x = 0;
 uint8_t lock_delay = 20;
+uint8_t current_y_offset = 0;
 bool is_grounded = false;
 
 uint8_t level = 1;
@@ -364,32 +365,20 @@ void init_title_screen()
   draw_title_screen(0);
 }
 
-void draw_paused_screen(uint32_t tick)
+void init_paused_text()
 {
-  pen(0, 0, 0);
-  frect(board.margin_left + (board.width * board.cell_size), 108, 6, 20);
-  pen(2, 8, 2);
-  frect(board.margin_left + (board.width * board.cell_size) + 6, 108, 2, 20);
+  target(paused_text);
 
-  draw_next_container();
-  draw_next_pieces();
+  font(6, 10, 1);
+  pen(0, 0, 0, 8);
+  text("PAUSED", 1, 1);
+  pen();
+  text("PAUSED", 0, 0);
 
-  if (tick % 40 < 20)
-  {
-    target(paused_text);
-
-    font(6, 10, 1);
-    pen(0, 0, 0, 8);
-    text("PAUSED", 1, 1);
-    pen();
-    text("PAUSED", 0, 0);
-
-    target();
-    blit(paused_text, 0, 0, 42, 10, 78, 108, 84, 20);
-  }
+  target();
 }
 
-void draw_game_over_screen(uint32_t tick)
+void init_game_over_text()
 {
   font(7, 10, 1);
 
@@ -401,7 +390,6 @@ void draw_game_over_screen(uint32_t tick)
   text("GAME OVER", 0, 0);
 
   target();
-  blit(game_over_text, 0, 0, 73, 10, 47, 110, 146, 20);
 }
 
 void draw_pieces()
@@ -416,23 +404,6 @@ void draw_pieces()
             board.margin_left + (x * board.cell_size),
             board.margin_top + (y * board.cell_size),
             types.colours[board.cells[y][x] - 1]);
-      }
-    }
-  }
-}
-
-void draw_current_piece(int8_t y_offset)
-{
-  for (int x = 0; x < 4; x++)
-  {
-    for (int y = 0; y < 4; y++)
-    {
-      if (types.shapes[current_piece.type][current_piece.rotation][y][x] > 0)
-      {
-        draw_cell(
-            board.margin_left + ((current_piece.x + x) * board.cell_size),
-            board.margin_top + ((current_piece.y + y) * board.cell_size) + y_offset,
-            types.colours[current_piece.type]);
       }
     }
   }
@@ -460,6 +431,83 @@ bool can_move(int tx, int ty, int tr)
 
   lock_delay = 20;
   return true;
+}
+
+void draw_current_piece()
+{
+  for (int x = 0; x < 4; x++)
+  {
+    for (int y = 0; y < 4; y++)
+    {
+      if (types.shapes[current_piece.type][current_piece.rotation][y][x] > 0)
+      {
+        draw_cell(
+            board.margin_left + ((current_piece.x + x) * board.cell_size),
+            board.margin_top + ((current_piece.y + y) * board.cell_size) + current_y_offset,
+            types.colours[current_piece.type]);
+      }
+    }
+  }
+}
+
+void draw_current_piece_outline()
+{
+  int bottom_y = current_piece.y;
+
+  while (can_move(current_piece.x, bottom_y + 1, current_piece.rotation))
+  {
+    bottom_y++;
+  }
+
+  for (int x = 0; x < 4; x++)
+  {
+    for (int y = 0; y < 4; y++)
+    {
+      int nx = current_piece.x + x;
+      int ny = bottom_y + y;
+
+      if (
+          types.shapes[current_piece.type][current_piece.rotation][y][x] > 0 &&
+          (nx < 0 || nx >= board.width ||
+           ny < 0 || ny >= board.height ||
+           board.cells[ny][nx] > 0))
+      {
+        continue;
+      }
+
+      if (types.shapes[current_piece.type][current_piece.rotation][y][x] > 0)
+      {
+        draw_cell_outline(
+            board.margin_left + ((current_piece.x + x) * board.cell_size),
+            board.margin_top + ((bottom_y + y) * board.cell_size),
+            types.colours[current_piece.type]);
+      }
+    }
+  }
+}
+
+void draw_paused_screen(uint32_t tick)
+{
+  if (tick % 40 == 0)
+  {
+    blit(paused_text, 0, 0, 42, 10, 78, 108, 84, 20);
+  }
+
+  if (tick % 40 == 20)
+  {
+    draw_board();
+    draw_next_container();
+
+    pen(0, 0, 0);
+    frect(board.margin_left + (board.width * board.cell_size), 108, 6, 16);
+    pen(2, 8, 2);
+    frect(board.margin_left + (board.width * board.cell_size) + 6, 108, 2, 16);
+  }
+}
+
+void draw_game_over_screen(uint32_t tick)
+{
+  blit(game_over_text, 0, 0, 73, 10, 47, 110, 146, 20);
 }
 
 void rotate_right()
@@ -563,52 +611,20 @@ void swap_hold_piece()
   frect(board.margin_left - 44, board.margin_top + 19, 32, 16);
 }
 
-void draw_current_piece_outline()
-{
-  int bottom_y = current_piece.y;
-
-  while (can_move(current_piece.x, bottom_y + 1, current_piece.rotation))
-  {
-    bottom_y++;
-  }
-
-  for (int x = 0; x < 4; x++)
-  {
-    for (int y = 0; y < 4; y++)
-    {
-      int nx = current_piece.x + x;
-      int ny = bottom_y + y;
-
-      if (
-          types.shapes[current_piece.type][current_piece.rotation][y][x] > 0 &&
-          (nx < 0 || nx >= board.width ||
-           ny < 0 || ny >= board.height ||
-           board.cells[ny][nx] > 0))
-      {
-        continue;
-      }
-
-      if (types.shapes[current_piece.type][current_piece.rotation][y][x] > 0)
-      {
-        draw_cell_outline(
-            board.margin_left + ((current_piece.x + x) * board.cell_size),
-            board.margin_top + ((bottom_y + y) * board.cell_size),
-            types.colours[current_piece.type]);
-      }
-    }
-  }
-}
-
 void init()
 {
   draw_background();
 
   queue_random_pieces();
   init_title_screen();
+  init_paused_text();
+  init_game_over_text();
 }
 
 void update(uint32_t tick)
 {
+  uint32_t prev_score = score;
+
   if (state == states::GAME_OVER)
   {
     if (pressed(A))
@@ -645,9 +661,11 @@ void update(uint32_t tick)
       draw_background();
       get_next_piece();
       draw_next_container();
+      draw_next_pieces();
       draw_hold_container();
       draw_level_container();
       draw_level();
+      draw_score();
     }
 
     return;
@@ -666,6 +684,7 @@ void update(uint32_t tick)
 
       draw_next_container();
       draw_next_pieces();
+      draw_hold_container();
     }
 
     return;
@@ -674,12 +693,16 @@ void update(uint32_t tick)
   if (pressed(Y))
   {
     state = states::PAUSED;
+    draw_board();
+    draw_next_container();
     return;
   }
 
   if (pressed(X))
   {
     swap_hold_piece();
+    draw_hold_piece();
+    draw_next_pieces();
   }
 
   if (pressed(A))
@@ -780,7 +803,7 @@ void update(uint32_t tick)
         }
       }
 
-      draw_current_piece(0);
+      draw_current_piece();
 
       if (current_piece.y == -1)
       {
@@ -789,6 +812,7 @@ void update(uint32_t tick)
       }
 
       get_next_piece();
+      draw_next_pieces();
     }
 
     int rows_full = 0;
@@ -855,6 +879,11 @@ void update(uint32_t tick)
       break;
     }
   }
+
+  if (score != prev_score)
+  {
+    draw_score();
+  }
 }
 
 void draw(uint32_t tick)
@@ -863,19 +892,18 @@ void draw(uint32_t tick)
   {
     draw_board();
     draw_pieces();
-    draw_next_pieces();
-    draw_hold_piece();
-    draw_score();
-
-    int8_t y_offset = 0;
 
     if (!is_grounded)
     {
-      y_offset = (((tick - 1) % (40 - ((40 / 15) * level)) / 40.0)) * board.cell_size;
+      current_y_offset = (((tick - 1) % (40 - ((40 / 15) * level)) / 40.0)) * board.cell_size;
+      draw_current_piece_outline();
+    }
+    else
+    {
+      current_y_offset = 0;
     }
 
-    draw_current_piece_outline();
-    draw_current_piece(y_offset);
+    draw_current_piece();
   }
 
   if (state == states::PAUSED)
@@ -891,19 +919,20 @@ void draw(uint32_t tick)
   // DEBUG
   // uint32_t delta_time = time() - last_time;
   // uint32_t fps = 0;
-  //
-  // if (delta_time > 0) {
+
+  // if (delta_time > 0)
+  // {
   //   fps = 1000 / delta_time;
   // }
-  //
+
   // last_time = time();
-  //
+
   // font();
   // pen();
   // frect(220, 200, 20, 40);
   // pen(0, 0, 0);
-  // text(str((uint32_t) lines_cleared), 220, 200);
-  // text(str((uint32_t) lock_delay), 220, 210);
+  // text(str((uint32_t)lines_cleared), 220, 200);
+  // text(str((uint32_t)lock_delay), 220, 210);
   // text(str(delta_time), 220, 220);
   // text(str(fps), 220, 230);
 }
