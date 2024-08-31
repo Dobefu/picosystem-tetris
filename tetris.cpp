@@ -871,7 +871,7 @@ void draw(uint32_t tick)
 
     if (!is_grounded)
     {
-      y_offset = ((tick % (40 - ((40 / 15) * level)) / 40.0)) * board.cell_size;
+      y_offset = (((tick - 1) % (40 - ((40 / 15) * level)) / 40.0)) * board.cell_size;
     }
 
     draw_current_piece_outline();
