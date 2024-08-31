@@ -25,18 +25,16 @@ buffer_t *game_over_text = buffer(73, 10);
 
 buffer_t *score_text = buffer(50, 10);
 
-int last_time = 0;
-
 std::deque<uint32_t> next_pieces;
 int8_t hold_piece = -1;
 uint32_t score = 0;
 
 uint8_t pressed_time_x = 0;
-uint8_t lock_delay = 20;
-uint8_t current_y_offset = 0;
+char lock_delay = 20;
+char current_y_offset = 0;
 bool is_grounded = false;
 
-uint8_t level = 1;
+uint32_t level = 1;
 uint8_t lines_cleared = 0;
 
 void draw_background()
@@ -216,7 +214,7 @@ void draw_level()
 
   pen();
   font();
-  text(str((uint32_t)level), (board.margin_left / 2) - 5 + x_offset, 95);
+  text(str(level), (board.margin_left / 2) - 5 + x_offset, 95);
 }
 
 void draw_hold_piece()
@@ -917,22 +915,12 @@ void draw(uint32_t tick)
   }
 
   // DEBUG
-  // uint32_t delta_time = time() - last_time;
-  // uint32_t fps = 0;
-
-  // if (delta_time > 0)
-  // {
-  //   fps = 1000 / delta_time;
-  // }
-
-  // last_time = time();
-
-  // font();
-  // pen();
-  // frect(220, 200, 20, 40);
-  // pen(0, 0, 0);
-  // text(str((uint32_t)lines_cleared), 220, 200);
-  // text(str((uint32_t)lock_delay), 220, 210);
-  // text(str(delta_time), 220, 220);
-  // text(str(fps), 220, 230);
+  font();
+  pen();
+  frect(225, 200, 20, 40);
+  pen(0, 0, 0);
+  text(str((uint32_t)lines_cleared), 226, 201);
+  text(str((uint32_t)lock_delay), 226, 211);
+  text(str(stats.idle), 226, 221);
+  text(str(stats.fps), 226, 231);
 }
