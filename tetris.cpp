@@ -865,70 +865,93 @@ void update(uint32_t tick)
 
       get_next_piece();
       draw_next_pieces();
-    }
 
-    int rows_full = 0;
+      int rows_full = 0;
 
-    for (int y = 0; y < board.height; y++)
-    {
-      bool full = true;
-
-      for (int x = 0; x < board.width; x++)
+      for (int y = board.height - 1; y >= 0; y--)
       {
-        if (board.cells[y][x] == 0)
-        {
-          full = false;
-          break;
-        }
-      }
-
-      if (full)
-      {
-        rows_full++;
-
-        for (int yy = y; yy > 0; yy--)
-        {
-          for (int x = 0; x < board.width; x++)
-          {
-            board.cells[yy][x] = board.cells[yy - 1][x];
-          }
-        }
+        bool full = true;
+        bool empty = true;
 
         for (int x = 0; x < board.width; x++)
         {
-          board.cells[0][x] = 0;
+          if (board.cells[y][x] == 0)
+          {
+            full = false;
+          }
+          else
+          {
+            empty = false;
+          }
+
+          if (!full && !empty)
+          {
+            break;
+          }
+        }
+
+        // You cannot have populated rows after an empty one, so skip checking.
+        if (empty)
+        {
+          break;
+        }
+
+        if (full)
+        {
+          rows_full++;
+
+          for (int yy = y; yy > 0; yy--)
+          {
+            for (int x = 0; x < board.width; x++)
+            {
+              board.cells[yy][x] = board.cells[yy - 1][x];
+            }
+          }
+
+          for (int x = 0; x < board.width; x++)
+          {
+            board.cells[0][x] = 0;
+          }
+
+          // More than 4 full rows can't happen, so let's skip checking the rest.
+          if (rows_full == 4)
+          {
+            break;
+          }
+
+          y++;
         }
       }
-    }
 
-    lines_cleared = lines_cleared + rows_full;
-    uint8_t last_level = level;
-    level = (lines_cleared / 5) + 1;
+      lines_cleared = lines_cleared + rows_full;
+      uint8_t last_level = level;
+      level = (lines_cleared / 5) + 1;
 
-    if (level > 15)
-    {
-      level = 15;
-    }
+      if (level > 15)
+      {
+        level = 15;
+      }
 
-    if (level != last_level)
-    {
-      draw_level();
-    }
+      if (level != last_level)
+      {
+        draw_level();
+      }
 
-    switch (rows_full)
-    {
-    case 4:
-      score += 800 * level;
-      break;
-    case 3:
-      score += 500 * level;
-      break;
-    case 2:
-      score += 300 * level;
-      break;
-    case 1:
-      score += 100 * level;
-      break;
+      switch (rows_full)
+      {
+      case 4:
+        score += 800 * level;
+        break;
+      case 3:
+        score += 500 * level;
+        break;
+      case 2:
+        score += 300 * level;
+        break;
+      case 1:
+        score += 100 * level;
+        break;
+      }
     }
   }
 
