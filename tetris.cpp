@@ -44,6 +44,7 @@ bool is_grounded = false;
 
 uint32_t level = 1;
 uint8_t lines_cleared = 0;
+uint32_t tick = 0;
 
 void draw_background()
 {
@@ -630,9 +631,14 @@ void init()
   init_game_over_text();
 }
 
-void update(uint32_t tick)
+void update(uint32_t internal_tick)
 {
   uint32_t prev_score = score;
+
+  if (state != states::PAUSED)
+  {
+    tick++;
+  }
 
   if (state == states::GAME_OVER)
   {
@@ -962,7 +968,7 @@ void update(uint32_t tick)
   }
 }
 
-void draw(uint32_t tick)
+void draw(uint32_t internal_tick)
 {
   if (state == states::PLAYING)
   {
@@ -971,7 +977,7 @@ void draw(uint32_t tick)
 
     if (!is_grounded)
     {
-      current_y_offset = (((tick - 1) % (40 - ((40 / 15) * level)) / 40.0)) * board.cell_size;
+      current_y_offset = (((tick) % (stats.fps - ((stats.fps / 15) * level)) / (float)stats.fps)) * board.cell_size;
       draw_current_piece_outline();
     }
     else
@@ -984,7 +990,7 @@ void draw(uint32_t tick)
 
   if (state == states::PAUSED)
   {
-    draw_paused_screen(tick);
+    draw_paused_screen(internal_tick);
   }
 
   if (state == states::GAME_OVER)
