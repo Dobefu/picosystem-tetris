@@ -18,7 +18,8 @@ struct Types types;
 struct MainTheme main_theme;
 
 uint8_t volume = 100;
-voice_t s_voice = voice(100, 100, 70, 100);
+voice_t voice_main = voice(100, 100, 70, 100);
+voice_t voice_noise = voice(0, 0, 70, 0, 0, 0, 0, 100);
 int16_t duration_delay = 0;
 char main_theme_note = 0;
 bool main_theme_done = false;
@@ -592,6 +593,7 @@ void swap_hold_piece()
 {
   if (!current_piece.can_hold)
   {
+    play(voice_main, 200, 40, volume);
     return;
   }
 
@@ -602,6 +604,7 @@ void swap_hold_piece()
     hold_piece = current_piece.type;
     get_next_piece();
     current_piece.can_hold = false;
+    play(voice_main, 600, 120, volume);
     return;
   }
 
@@ -614,6 +617,7 @@ void swap_hold_piece()
 
   pen(0, 0, 0);
   frect(board.margin_left - 44, board.margin_top + 19, 32, 16);
+  play(voice_main, 600, 120, volume);
 }
 
 void init()
@@ -662,7 +666,7 @@ void update(uint32_t tick)
   {
     if (!main_theme_done && duration_delay <= 0)
     {
-      play(s_voice, main_theme.frequencies[main_theme_note], main_theme.durations[main_theme_note], volume);
+      play(voice_main, main_theme.frequencies[main_theme_note], main_theme.durations[main_theme_note], volume);
       duration_delay = main_theme.durations[main_theme_note] + main_theme.tempo;
       main_theme_note = main_theme_note + 1;
 
@@ -736,11 +740,13 @@ void update(uint32_t tick)
   if (pressed(A))
   {
     rotate_right();
+    play(voice_main, 300, 80, volume);
   }
 
   if (pressed(B))
   {
     rotate_left();
+    play(voice_main, 400, 80, volume);
   }
 
   if (button(LEFT) && lock_delay > 0)
@@ -750,6 +756,11 @@ void update(uint32_t tick)
       if (can_move(current_piece.x - 1, current_piece.y, current_piece.rotation))
       {
         current_piece.x--;
+        play(voice_main, 300, 40, volume);
+      }
+      else
+      {
+        play(voice_main, 200, 40, volume);
       }
     }
   }
@@ -761,6 +772,11 @@ void update(uint32_t tick)
       if (can_move(current_piece.x + 1, current_piece.y, current_piece.rotation))
       {
         current_piece.x++;
+        play(voice_main, 300, 40, volume);
+      }
+      else
+      {
+        play(voice_main, 200, 40, volume);
       }
     }
   }
@@ -782,12 +798,15 @@ void update(uint32_t tick)
       {
         current_piece.y++;
         score += 1;
+        play(voice_main, 400, 40, volume);
       }
     }
   }
 
   if (pressed(UP))
   {
+    char prev_y = current_piece.y;
+
     while (can_move(current_piece.x, current_piece.y + 1, current_piece.rotation))
     {
       current_piece.y++;
@@ -795,6 +814,11 @@ void update(uint32_t tick)
     }
 
     lock_delay = 0;
+
+    if (prev_y != current_piece.y)
+    {
+      play(voice_main, 500, 100, volume);
+    }
   }
 
   is_grounded = (!can_move(current_piece.x, current_piece.y + 1, current_piece.rotation));
@@ -911,6 +935,7 @@ void update(uint32_t tick)
   if (score != prev_score)
   {
     draw_score();
+    play(voice_main, 1000, 80, volume);
   }
 }
 
