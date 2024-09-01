@@ -15,6 +15,13 @@ using namespace picosystem;
 struct Board board;
 struct Piece current_piece;
 struct Types types;
+struct MainTheme main_theme;
+
+uint8_t volume = 100;
+voice_t s_voice = voice(100, 100, 70, 100);
+int16_t duration_delay = 0;
+char main_theme_note = 0;
+bool main_theme_done = false;
 
 states state = states::TITLE;
 
@@ -653,9 +660,27 @@ void update(uint32_t tick)
 
   if (state == states::TITLE)
   {
+    if (!main_theme_done && duration_delay <= 0)
+    {
+      play(s_voice, main_theme.frequencies[main_theme_note], main_theme.durations[main_theme_note], volume);
+      duration_delay = main_theme.durations[main_theme_note] + main_theme.tempo;
+      main_theme_note = main_theme_note + 1;
+
+      if (main_theme_note > main_theme.length)
+      {
+        main_theme_note = 0;
+        main_theme_done = true;
+      }
+    }
+    else
+    {
+      duration_delay = duration_delay - stats.fps;
+    }
+
     if (pressed(A))
     {
       state = states::PLAYING;
+
       draw_background();
       get_next_piece();
       draw_next_container();
@@ -664,6 +689,10 @@ void update(uint32_t tick)
       draw_level_container();
       draw_level();
       draw_score();
+
+      duration_delay = 0;
+      main_theme_note = 0;
+      main_theme_done = false;
     }
 
     return;
