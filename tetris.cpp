@@ -44,7 +44,7 @@ bool is_grounded = false;
 
 uint32_t level = 1;
 uint8_t lines_cleared = 0;
-uint32_t tick = 0;
+char tick = 0;
 
 void draw_background()
 {
@@ -324,7 +324,7 @@ void draw_title_screen(uint32_t tick)
 
   blit(title_text, 0, 0, 42, 10, 36, 80, 168, 40);
 
-  if (tick % 40 < 20)
+  if (tick % stats.fps < stats.fps / 2)
   {
     blit(press_text, 0, 0, 49, 10, 72, 120, 98, 20);
   }
@@ -495,12 +495,12 @@ void draw_current_piece_outline()
 
 void draw_paused_screen(uint32_t tick)
 {
-  if (tick % 40 == 0)
+  if (tick % stats.fps == 0)
   {
     blit(paused_text, 0, 0, 42, 10, 78, 108, 84, 20);
   }
 
-  if (tick % 40 == 20)
+  if (tick % stats.fps == stats.fps / 2)
   {
     draw_board();
     draw_next_container();
@@ -638,6 +638,11 @@ void update(uint32_t internal_tick)
   if (state != states::PAUSED)
   {
     tick++;
+  }
+
+  if (tick >= stats.fps)
+  {
+    tick = 1;
   }
 
   if (state == states::GAME_OVER)
@@ -839,7 +844,7 @@ void update(uint32_t internal_tick)
     lock_delay = lock_delay - 1;
   }
 
-  if (tick % (40 - ((40 / 15) * level)) == 0 || level == 15)
+  if (tick % (stats.fps - ((stats.fps / 15) * level)) == 0 || level == 15)
   {
     if (!is_grounded)
     {
@@ -861,6 +866,7 @@ void update(uint32_t internal_tick)
         }
       }
 
+      tick = 0;
       draw_current_piece();
 
       if (current_piece.y == -1)
