@@ -6,6 +6,7 @@ struct Board
 {
   char width = 10;
   char height = 24;
+  char visual_height = 20;
   char cell_size = 8;
   char margin_left = 50;
   char margin_top = 14;

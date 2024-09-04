@@ -55,16 +55,16 @@ void draw_background()
 
   frect(
       board.margin_left - 6,
-      board.margin_top - 6,
+      (board.margin_top - 6) + ((board.height - board.visual_height) * board.cell_size),
       board.width * board.cell_size + 12,
-      board.height * board.cell_size + 12);
+      board.visual_height * board.cell_size + 12);
 }
 
 void draw_board()
 {
   pen(0, 0, 0);
 
-  for (int y = 0; y < board.height; y++)
+  for (int y = 0; y < board.visual_height; y++)
   {
     for (int x = 0; x < board.width; x++)
     {
@@ -77,7 +77,7 @@ void draw_board()
 
       frect(
           board.margin_left + (x * board.cell_size) + 1,
-          board.margin_top + (y * board.cell_size) + 1,
+          (board.margin_top + (y * board.cell_size) + 1) + ((board.height - board.visual_height) * board.cell_size),
           board.cell_size - 2,
           board.cell_size - 2);
 
@@ -85,7 +85,7 @@ void draw_board()
 
       rect(
           board.margin_left + (x * board.cell_size),
-          board.margin_top + (y * board.cell_size),
+          (board.margin_top + (y * board.cell_size)) + ((board.height - board.visual_height) * board.cell_size),
           board.cell_size,
           board.cell_size);
     }
@@ -94,44 +94,62 @@ void draw_board()
 
 void draw_cell(int x, int y, color_t colour)
 {
+  if (y < (board.margin_top) + ((board.height - board.visual_height - 1) * board.cell_size))
+    return;
+
+  char min_y = (board.margin_top) + ((board.height - board.visual_height) * board.cell_size);
+  char draw_height = board.cell_size;
+
+  if (y < min_y)
+    draw_height -= min_y - y;
+
   pen(colour);
   frect(
       x,
-      y,
+      MAX(min_y, y),
       board.cell_size,
-      board.cell_size);
+      draw_height);
 
-  pen(15, 15, 15, 6);
-  frect(
-      x,
-      y,
-      board.cell_size,
-      1);
+  if (y >= min_y)
+  {
+    pen(15, 15, 15, 6);
+    frect(
+        x,
+        y,
+        board.cell_size,
+        1);
+  }
+
+  if (y + board.cell_size - 1 >= min_y)
+  {
+    pen(0, 0, 0, 6);
+    frect(
+        x,
+        y + board.cell_size - 1,
+        board.cell_size,
+        1);
+  }
 
   pen(0, 0, 0, 4);
   frect(
       x,
-      y,
+      MAX(min_y, y),
       1,
-      board.cell_size);
-
-  pen(0, 0, 0, 6);
-  frect(
-      x,
-      y + board.cell_size - 1,
-      board.cell_size,
-      1);
+      draw_height);
 
   pen(0, 0, 0, 2);
   frect(
       x + board.cell_size - 1,
-      y,
+      MAX(min_y, y),
       1,
-      board.cell_size);
+      draw_height);
 }
 
 void draw_cell_outline(int x, int y, color_t colour)
 {
+  if (y < (board.margin_top) + ((board.height - board.visual_height) * board.cell_size))
+    return;
+
   pen(colour);
 
   rect(
@@ -144,15 +162,15 @@ void draw_cell_outline(int x, int y, color_t colour)
 void draw_next_container()
 {
   pen(0, 0, 0);
-  frect(board.width * board.cell_size + board.margin_left + 6, board.margin_top + 10, 42, 32);
+  frect(board.width * board.cell_size + board.margin_left + 6, board.margin_top + 30, 42, 32);
 
   pen();
   font();
-  text("NEXT", board.width * board.cell_size + board.margin_left + 13, board.margin_top + 7);
+  text("NEXT", board.width * board.cell_size + board.margin_left + 13, board.margin_top + 27);
 
   pen(1, 1, 1);
-  frect(board.width * board.cell_size + board.margin_left + 8, board.margin_top + 44, 37, 32);
-  frect(board.width * board.cell_size + board.margin_left + 8, board.margin_top + 78, 37, 32);
+  frect(board.width * board.cell_size + board.margin_left + 8, board.margin_top + 64, 37, 32);
+  frect(board.width * board.cell_size + board.margin_left + 8, board.margin_top + 98, 37, 32);
 }
 
 void draw_next_pieces()
@@ -181,7 +199,7 @@ void draw_next_pieces()
         {
           draw_cell(
               board.margin_left + ((board.width + x) * board.cell_size) + x_offset + 8,
-              board.margin_top + ((((i * 4) + y + 1) * board.cell_size) + 3) + y_offset + i,
+              board.margin_top + ((((i * 4) + y + 1) * board.cell_size) + 3) + y_offset + 20 + i,
               types.colours[next_pieces[i]]);
         }
       }
@@ -192,27 +210,27 @@ void draw_next_pieces()
 void draw_hold_container()
 {
   pen(0, 0, 0);
-  frect(board.margin_left - 6 - 42, board.margin_top + 10, 42, 32);
+  frect(board.margin_left - 6 - 42, board.margin_top + 30, 42, 32);
 
   pen();
   font();
-  text("HOLD", board.margin_left + 3 - 42, board.margin_top + 7);
+  text("HOLD", board.margin_left + 3 - 42, board.margin_top + 27);
 }
 
 void draw_level_container()
 {
   pen(1, 1, 1);
-  frect(board.margin_left - 46, 84, 38, 28);
+  frect(board.margin_left - 46, 94, 38, 28);
 
   pen();
   font();
-  text("LEVEL", (board.margin_left / 2) - 17, 80);
+  text("LEVEL", (board.margin_left / 2) - 17, 90);
 }
 
 void draw_level()
 {
   pen(1, 1, 1);
-  frect(board.margin_left - 33, 94, 12, 9);
+  frect(board.margin_left - 33, 104, 12, 9);
 
   int8_t x_offset = 0;
 
@@ -223,7 +241,7 @@ void draw_level()
 
   pen();
   font();
-  text(str(level), (board.margin_left / 2) - 5 + x_offset, 95);
+  text(str(level), (board.margin_left / 2) - 5 + x_offset, 105);
 }
 
 void draw_hold_piece()
@@ -252,7 +270,7 @@ void draw_hold_piece()
         {
           draw_cell(
               board.margin_left + ((x - 4) * board.cell_size) + x_offset - 14,
-              board.margin_top + ((y + 1) * board.cell_size) + 3 + y_offset,
+              board.margin_top + ((y + 1) * board.cell_size) + 23 + y_offset,
               types.colours[hold_piece]);
         }
       }
@@ -509,6 +527,7 @@ void draw_paused_screen(uint32_t tick)
     frect(board.margin_left + (board.width * board.cell_size), 108, 6, 16);
     pen(2, 8, 2);
     frect(board.margin_left + (board.width * board.cell_size) + 6, 108, 2, 16);
+    frect(board.margin_left + (board.width * board.cell_size) + 8, 110, 22, 2);
   }
 }
 
@@ -570,7 +589,7 @@ void rotate_left()
 void get_next_piece()
 {
   current_piece.x = 3;
-  current_piece.y = -1;
+  current_piece.y = 2;
   current_piece.type = next_pieces.front();
   current_piece.rotation = 0;
   current_piece.can_hold = true;
@@ -582,12 +601,7 @@ void get_next_piece()
     queue_random_pieces();
   }
 
-  pen(0, 0, 0);
-  frect(board.width * board.cell_size + board.margin_left + 10, board.margin_top + 19, 32, 16);
-
-  pen(1, 1, 1);
-  frect(board.width * board.cell_size + board.margin_left + 10, board.margin_top + 52, 32, 16);
-  frect(board.width * board.cell_size + board.margin_left + 10, board.margin_top + 85, 32, 16);
+  draw_next_container();
 }
 
 void swap_hold_piece()
@@ -617,7 +631,7 @@ void swap_hold_piece()
   current_piece.rotation = 0;
 
   pen(0, 0, 0);
-  frect(board.margin_left - 44, board.margin_top + 19, 32, 16);
+  draw_hold_container();
   play(voice_main, 600, 120, volume);
 }
 
@@ -867,9 +881,8 @@ void update(uint32_t internal_tick)
       }
 
       tick = 0;
-      draw_current_piece();
 
-      if (current_piece.y == -1)
+      if (current_piece.y == 2)
       {
         state = states::GAME_OVER;
         return;
@@ -880,7 +893,7 @@ void update(uint32_t internal_tick)
 
       int rows_full = 0;
 
-      for (int y = board.height - 1; y >= 0; y--)
+      for (int y = board.height; y >= 0; y--)
       {
         bool full = true;
         bool empty = true;
