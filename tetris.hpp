@@ -2,6 +2,9 @@
 
 using namespace picosystem;
 
+#ifndef _TETRIS_H
+#define _TETRIS_H
+
 void init();
 void update(uint32_t tick);
 void draw(uint32_t tick);
@@ -251,3 +254,5 @@ struct MainTheme
       406.250,
   };
 };
+
+#endif
