@@ -28,7 +28,7 @@ struct Types
 
   color_t colours[7] = {
       rgb(0, 14, 14),
-      rgb(0, 0, 14),
+      rgb(0, 0, 15),
       rgb(14, 10, 0),
       rgb(14, 14, 0),
       rgb(0, 14, 0),
