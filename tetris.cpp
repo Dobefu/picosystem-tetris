@@ -386,8 +386,6 @@ void init_title_screen()
   draw_next_pieces();
   draw_hold_piece();
   draw_score();
-
-  draw_title_screen(0);
 }
 
 void init_paused_text()
@@ -734,9 +732,10 @@ void update(uint32_t internal_tick)
       state = states::PLAYING;
 
       pen(0, 0, 0);
-      frect(board.margin_left + (board.width * board.cell_size), 108, 6, 20);
+      frect(board.margin_left + (board.width * board.cell_size), 108, 6, 16);
       pen(2, 8, 2);
-      frect(board.margin_left + (board.width * board.cell_size) + 6, 108, 2, 20);
+      frect(board.margin_left + (board.width * board.cell_size) + 6, 108, 2, 16);
+      frect(board.margin_left + (board.width * board.cell_size) + 8, 110, 22, 2);
 
       draw_next_container();
       draw_next_pieces();
@@ -989,6 +988,11 @@ void update(uint32_t internal_tick)
 
 void draw(uint32_t internal_tick)
 {
+  if (state == states::TITLE)
+  {
+    draw_title_screen(internal_tick);
+  }
+
   if (state == states::PLAYING)
   {
     draw_board();
